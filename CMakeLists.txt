@@ -21,8 +21,8 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment ve
 
 include(FetchContent)
 if (NOT DEFINED URL_BASE)
-    set(URL_BASE "github.com")
-    # set(URL_BASE "github.com.cnpmjs.org")
+    # set(URL_BASE "github.com")
+    set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
 set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bcos-cmake-scripts)
@@ -40,8 +40,8 @@ list(APPEND CMAKE_MODULE_PATH ${BCOS_BOOSTSSL_CMAKE_DIR})
 #init hunter
 include(HunterGate)
 HunterGate(
-    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/b55a347258b0fc3eda47f4ccd3e2c0db595b4957.tar.gz"
-    SHA1 "9331d1e70cee5498bd59ada13aa68278cbb9a2d6"
+    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/1030fc0469cc8d974b3a3d020ab2fd59df006edb.tar.gz"
+    SHA1 "1bf2dc0631119c6304a9bac7445f1e77914c0fb7"
     FILEPATH "${CMAKE_SOURCE_DIR}/cmake/config.cmake"
 )
 
