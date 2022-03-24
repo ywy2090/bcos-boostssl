@@ -36,7 +36,7 @@ using namespace bcos::boostssl::context;
 
 void usage()
 {
-    std::cerr << "Usage: echo-client-sample <peerIp> <peerPort> <ssl> <dataSize>\n"
+    std::cerr << "Usage: echo-client-sample <peerIp> <peerPort> <echo> <dataSize>\n"
               << "Example:\n"
               << "    ./echo-client-sample 127.0.0.1 20200 true 2\n"
               << "    ./echo-client-sample 127.0.0.1 20200 false 2\n";
@@ -53,29 +53,28 @@ int main(int argc, char** argv)
 
     std::string host = argv[1];
     uint16_t port = atoi(argv[2]);
-    
 
-    std::string disableSsl = "true";
+    bool isEcho = false;
     uint16_t sizeNum = 1;
     uint16_t interval = 10;
 
     if (argc > 3)
     {
-        disableSsl = argv[3];
+        isEcho = (std::string(argv[3]) == "true");
     }
 
-    if(argc > 4)
+    if (argc > 4)
     {
         sizeNum = atoi(argv[4]);
     }
 
-    if(argc > 5)
+    if (argc > 5)
     {
         interval = atoi(argv[5]);
     }
 
     BCOS_LOG(INFO) << LOG_DESC("echo-client-sample") << LOG_KV("ip", host) << LOG_KV("port", port)
-                   << LOG_KV("disableSsl", disableSsl) << LOG_KV("datasize", sizeNum);
+                   << LOG_KV("echo", isEcho) << LOG_KV("datasize", sizeNum);
 
     auto config = std::make_shared<WsConfig>();
     config->setModel(WsModel::Client);
@@ -89,7 +88,7 @@ int main(int argc, char** argv)
     config->setConnectedPeers(peers);
 
     config->setThreadPoolSize(1);
-    config->setDisableSsl(0 == disableSsl.compare("true"));
+    config->setDisableSsl(false);
     if (!config->disableSsl())
     {
         auto contextConfig = std::make_shared<ContextConfig>();
@@ -108,7 +107,7 @@ int main(int argc, char** argv)
     // construct message
     auto msg = std::dynamic_pointer_cast<WsMessage>(wsService->messageFactory()->buildMessage());
     msg->setPacketType(999);
-    
+
     // std::string randStr = boost::uuids::to_string(boost::uuids::random_generator()());
     // randStr.erase(std::remove(randStr.begin(), randStr.end(), '-'), randStr.end());
     std::string randStr(sizeNum, 'a');
@@ -116,37 +115,45 @@ int main(int argc, char** argv)
     msg->setPayload(std::make_shared<bytes>(randStr.begin(), randStr.end()));
 
     BCOS_LOG(INFO) << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC("send request")
-                    << LOG_KV("request size", randStr.size());
+                   << LOG_KV("request size", randStr.size());
 
     int i = 0;
     while (true)
     {
         auto seq = wsService->messageFactory()->newSeq();
         msg->setSeq(seq);
-        wsService->asyncSendMessage(msg, Options(-1),
-            [](Error::Ptr _error, std::shared_ptr<boostssl::MessageFace>,
-                std::shared_ptr<WsSession> _session) {
-                (void)_session;
-                if (_error && _error->errorCode() != 0)
-                {
-                    BCOS_LOG(ERROR)
-                        << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC("callback response error")
-                        << LOG_KV("errorCode", _error->errorCode())
-                        << LOG_KV("errorMessage", _error->errorMessage());
-                    return;
-                }
 
-                // auto resp = std::string(_msg->payload()->begin(), _msg->payload()->end());
-                // BCOS_LOG(INFO) << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC("receive response")
-                //               << LOG_KV("resp", resp);
-            });
-        
+        if (isEcho)
+        {
+            wsService->asyncSendMessage(msg, Options(-1),
+                [](Error::Ptr _error, std::shared_ptr<boostssl::MessageFace>,
+                    std::shared_ptr<WsSession> _session) {
+                    (void)_session;
+                    if (_error && _error->errorCode() != 0)
+                    {
+                        BCOS_LOG(ERROR)
+                            << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC("callback response error")
+                            << LOG_KV("errorCode", _error->errorCode())
+                            << LOG_KV("errorMessage", _error->errorMessage());
+                        return;
+                    }
 
-        if ( i % interval == 0)
+                    // auto resp = std::string(_msg->payload()->begin(), _msg->payload()->end());
+                    // BCOS_LOG(INFO) << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC("receive
+                    // response")
+                    //               << LOG_KV("resp", resp);
+                });
+        }
+        else
+        {
+            wsService->asyncSendMessage(msg);
+        }
+
+        if (i % interval == 0)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-        
+
         i++;
     }
 

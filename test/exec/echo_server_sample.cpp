@@ -36,7 +36,7 @@ using namespace bcos::boostssl::context;
 
 void usage()
 {
-    std::cerr << "Usage: echo-server-sample <listenIP> <listenPort> <ssl>\n"
+    std::cerr << "Usage: echo-server-sample <listenIP> <listenPort> <echo>\n"
               << "Example:\n"
               << "    ./echo-server-sample 127.0.0.1 20200 true\n"
               << "    ./echo-server-sample 127.0.0.1 20200 false\n";
@@ -53,16 +53,16 @@ int main(int argc, char** argv)
 
     std::string host = argv[1];
     uint16_t port = atoi(argv[2]);
-
-    std::string disableSsl = "true";
+    bool isEcho = false;
+    std::string echo = "false";
 
     if (argc > 3)
     {
-        disableSsl = argv[3];
+        isEcho = std::string(argv[3]) == "true";
     }
 
     BCOS_LOG(INFO) << LOG_DESC("echo-server-sample") << LOG_KV("ip", host) << LOG_KV("port", port)
-                   << LOG_KV("disableSsl", disableSsl);
+                   << LOG_KV("is echo", isEcho);
 
     auto config = std::make_shared<WsConfig>();
     config->setModel(WsModel::Server);
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     config->setListenIP(host);
     config->setListenPort(port);
     config->setThreadPoolSize(1);
-    config->setDisableSsl(0 == disableSsl.compare("true"));
+    config->setDisableSsl(false);
     if (!config->disableSsl())
     {
         auto contextConfig = std::make_shared<ContextConfig>();
@@ -84,8 +84,8 @@ int main(int argc, char** argv)
     wsInitializer->setConfig(config);
     wsInitializer->initWsService(wsService);
 
-    wsService->registerMsgHandler(
-        999, [](std::shared_ptr<boostssl::MessageFace> _msg, std::shared_ptr<WsSession> _session) {
+    wsService->registerMsgHandler(999,
+        [isEcho](std::shared_ptr<boostssl::MessageFace> _msg, std::shared_ptr<WsSession> _session) {
             /*auto seq = _msg->seq();
             auto data = std::string(_msg->payload()->begin(), _msg->payload()->end());
             BCOS_LOG(INFO) << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC(" receive requst seq ")
@@ -93,9 +93,12 @@ int main(int argc, char** argv)
             BCOS_LOG(INFO) << LOG_BADGE(" [Main] ===>>>> ") << LOG_DESC(" receive requst message ")
                            << LOG_KV("data", data);
                            */
-            _session->asyncSendMessage(_msg);
+            if (isEcho)
+            {
+                _session->asyncSendMessage(_msg);
+            }
         });
-    
+
     auto handler = wsService->getMsgHandler(999);
     if (!handler)
     {
