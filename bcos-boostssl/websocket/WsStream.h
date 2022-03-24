@@ -71,14 +71,14 @@ public:
 
     void initDefaultOpt()
     {
-        // default open compress option
-        {
-            boost::beast::websocket::permessage_deflate opt;
-            opt.client_enable = true;  // for clients
-            opt.server_enable = true;  // for servers
+        // // default open compress option
+        // {
+        //     boost::beast::websocket::permessage_deflate opt;
+        //     opt.client_enable = true;  // for clients
+        //     opt.server_enable = true;  // for servers
 
-            m_stream->set_option(opt);
-        }
+        //     m_stream->set_option(opt);
+        // }
 
         // default timeout option
         {
