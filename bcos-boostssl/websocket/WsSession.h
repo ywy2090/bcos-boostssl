@@ -19,10 +19,10 @@
  */
 #pragma once
 #include <bcos-boostssl/httpserver/Common.h>
+#include <bcos-boostssl/interfaces/NodeInfo.h>
 #include <bcos-boostssl/websocket/Common.h>
 #include <bcos-boostssl/websocket/WsMessage.h>
 #include <bcos-boostssl/websocket/WsStream.h>
-#include <bcos-boostssl/interfaces/NodeInfo.h>
 #include <bcos-utilities/Common.h>
 #include <bcos-utilities/ThreadPool.h>
 #include <boost/asio/deadline_timer.hpp>
@@ -86,8 +86,8 @@ public:
      * @param _respCallback: callback
      * @return void:
      */
-    virtual void asyncSendMessage(std::shared_ptr<boostssl::MessageFace> _msg, Options _options = Options(),
-        RespCallBack _respCallback = RespCallBack());
+    virtual void asyncSendMessage(std::shared_ptr<boostssl::MessageFace> _msg,
+        Options _options = Options(), RespCallBack _respCallback = RespCallBack());
 
 public:
     std::string endPoint() const { return m_endPoint; }
@@ -147,10 +147,10 @@ public:
     int32_t maxWriteMsgSize() const { return m_maxWriteMsgSize; }
     void setMaxWriteMsgSize(int32_t _maxWriteMsgSize) { m_maxWriteMsgSize = _maxWriteMsgSize; }
 
-    std::size_t queueSize()
+    std::size_t msgQueueSize()
     {
-        boost::shared_lock<boost::shared_mutex> lock(x_queue);
-        return m_queue.size();
+        boost::shared_lock<boost::shared_mutex> lock(x_msgQueue);
+        return m_msgQueue.size();
     }
 
     std::string publicKey() const { return m_publicKey; }
@@ -216,8 +216,8 @@ private:
     };
 
     // send message queue
-    mutable boost::shared_mutex x_queue;
-    std::vector<std::shared_ptr<Message>> m_queue;
+    mutable boost::shared_mutex x_msgQueue;
+    std::list<std::shared_ptr<Message>> m_msgQueue;
 
     // for send performance statistics
     std::atomic<uint32_t> m_msgDelayCount = 0;
@@ -225,22 +225,19 @@ private:
         std::chrono::high_resolution_clock::now();
 
 
-std::chrono::time_point<std::chrono::high_resolution_clock> m_lastReadReportMS =
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_lastReadReportMS =
         std::chrono::high_resolution_clock::now();
     std::atomic<int64_t> m_msgRecvSizeTotal = 0;
     std::atomic<int64_t> m_msgRecvTimeTotal = 0;
     std::atomic<int64_t> m_lastSecondRecvMsgSizeTotal = 0;
     std::atomic<int64_t> m_lastSecondRecvMsgTimeTotal = 0;
 
-std::chrono::time_point<std::chrono::high_resolution_clock> m_lastWriteReportMS =
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_lastWriteReportMS =
         std::chrono::high_resolution_clock::now();
     std::atomic<int64_t> m_msgWriteSizeTotal = 0;
     std::atomic<int64_t> m_msgWriteTimeTotal = 0;
     std::atomic<int64_t> m_lastSecondWriteMsgSizeTotal = 0;
     std::atomic<int64_t> m_lastSecondWriteMsgTimeTotal = 0;
-
-    
-
 };
 
 }  // namespace ws

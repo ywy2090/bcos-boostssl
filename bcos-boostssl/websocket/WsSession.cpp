@@ -258,13 +258,17 @@ void WsSession::onWritePacket()
         bool isEmpty = false;
         std::shared_ptr<bcos::bytes> buffer = nullptr;
         {
-            boost::unique_lock<boost::shared_mutex> lock(x_queue);
-            msg = m_queue.front();
+            boost::unique_lock<boost::shared_mutex> lock(x_msgQueue);
+            msg = m_msgQueue.front();
             // remove the front ele from the queue, it has been sent
-            m_queue.erase(m_queue.begin());
-            nMsgQueueSize = m_queue.size();
-            isEmpty = m_queue.empty();
-            buffer = m_queue.front()->buffer;
+            // m_msgQueue.erase(m_msgQueue.begin());
+            m_msgQueue.pop_front();
+            nMsgQueueSize = m_msgQueue.size();
+            isEmpty = m_msgQueue.empty();
+            if (!isEmpty)
+            {
+                buffer = m_msgQueue.front()->buffer;
+            }
         }
 
         // send the next message if any
@@ -377,11 +381,11 @@ void WsSession::onWrite(std::shared_ptr<bytes> _buffer)
     bool isEmpty = false;
     std::shared_ptr<bcos::bytes> buffer = nullptr;
     {
-        std::unique_lock<boost::shared_mutex> lock(x_queue);
-        isEmpty = m_queue.empty();
+        std::unique_lock<boost::shared_mutex> lock(x_msgQueue);
+        isEmpty = m_msgQueue.empty();
         // data to be sent is always enqueue first
-        m_queue.push_back(msg);
-        buffer = m_queue.front()->buffer;
+        m_msgQueue.push_back(msg);
+        buffer = m_msgQueue.front()->buffer;
     }
 
     // no writing, send it
