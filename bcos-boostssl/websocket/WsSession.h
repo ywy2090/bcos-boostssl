@@ -31,6 +31,8 @@
 #include <boost/beast/websocket.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 
 namespace bcos
@@ -194,7 +196,7 @@ private:
     //
     WsStreamDelegate::Ptr m_wsStreamDelegate;
     // callbacks
-    boost::shared_mutex x_callback;
+    std::shared_mutex x_callback;
     std::unordered_map<std::string, CallBack::Ptr> m_callbacks;
 
     // callback handler

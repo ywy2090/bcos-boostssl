@@ -58,7 +58,7 @@ void WsSession::drop(uint32_t _reason)
         auto error = std::make_shared<Error>(
             WsError::SessionDisconnect, "the session has been disconnected");
 
-        boost::shared_lock<boost::shared_mutex> lock(x_callback);
+        std::shared_lock<std::shared_mutex> lock(x_callback);
 
         WEBSOCKET_SESSION(INFO) << LOG_BADGE("drop") << LOG_KV("reason", _reason)
                                 << LOG_KV("endpoint", m_endPoint)
@@ -82,7 +82,7 @@ void WsSession::drop(uint32_t _reason)
 
     // clear callbacks
     {
-        boost::unique_lock<boost::shared_mutex> lock(x_callback);
+        std::unique_lock<std::shared_mutex> lock(x_callback);
         m_callbacks.clear();
     }
 
@@ -479,7 +479,7 @@ void WsSession::asyncSendMessage(
 
 void WsSession::addRespCallback(const std::string& _seq, CallBack::Ptr _callback)
 {
-    std::unique_lock<boost::shared_mutex> lock(x_callback);
+    std::unique_lock<std::shared_mutex> lock(x_callback);
     m_callbacks[_seq] = _callback;
 }
 
@@ -487,7 +487,7 @@ WsSession::CallBack::Ptr WsSession::getAndRemoveRespCallback(const std::string& 
 {
     CallBack::Ptr callback = nullptr;
     {
-        boost::unique_lock<boost::shared_mutex> lock(x_callback);
+        std::unique_lock<std::shared_mutex> lock(x_callback);
         auto it = m_callbacks.find(_seq);
         if (it != m_callbacks.end())
         {
