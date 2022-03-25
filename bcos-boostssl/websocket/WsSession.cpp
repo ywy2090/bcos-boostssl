@@ -52,9 +52,6 @@ void WsSession::drop(uint32_t _reason)
 
     m_isDrop = true;
 
-    WEBSOCKET_SESSION(INFO) << LOG_BADGE("drop") << LOG_KV("reason", _reason)
-                            << LOG_KV("endpoint", m_endPoint) << LOG_KV("session", this);
-
     auto self = std::weak_ptr<WsSession>(shared_from_this());
     // call callbacks
     {
@@ -62,6 +59,11 @@ void WsSession::drop(uint32_t _reason)
             WsError::SessionDisconnect, "the session has been disconnected");
 
         boost::shared_lock<boost::shared_mutex> lock(x_callback);
+
+        WEBSOCKET_SESSION(INFO) << LOG_BADGE("drop") << LOG_KV("reason", _reason)
+                                << LOG_KV("endpoint", m_endPoint)
+                                << LOG_KV("cb size", m_callbacks.size()) << LOG_KV("session", this);
+
         for (auto& cbEntry : m_callbacks)
         {
             auto callback = cbEntry.second;

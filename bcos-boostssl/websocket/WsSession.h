@@ -158,7 +158,7 @@ public:
 
     nodeID obtainNodeID(std::string const& _publicKey);
 
-    nodeID nodeID() { return m_nodeId; }
+    // nodeID nodeID() { return m_nodeId; }
     void setNodeID(boostssl::nodeID _nodeId) { m_nodeId = _nodeId; }
 
 public:

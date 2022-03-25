@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
     config->setListenIP(host);
     config->setListenPort(port);
-    config->setThreadPoolSize(1);
+    // config->setThreadPoolSize(1);
     config->setDisableSsl(false);
     if (!config->disableSsl())
     {
