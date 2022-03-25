@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     peers->push_back(endpoint);
     config->setConnectedPeers(peers);
 
-    // config->setThreadPoolSize(1);
+    config->setThreadPoolSize(1);
     config->setDisableSsl(false);
     if (!config->disableSsl())
     {
