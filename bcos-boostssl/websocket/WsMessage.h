@@ -92,8 +92,6 @@ public:
     virtual boostssl::MessageFace::Ptr buildMessage() override
     {
         auto msg = std::make_shared<WsMessage>();
-        // auto seq = newSeq();
-        // msg->setSeq(seq);
         return msg;
     }
 

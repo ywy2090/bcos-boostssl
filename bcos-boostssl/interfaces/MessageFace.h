@@ -58,7 +58,7 @@ public:
 public:
     virtual ~MessageFaceFactory() {}
     virtual MessageFace::Ptr buildMessage() = 0;
-    virtual std::string newSeq() { return std::string(""); }
+    virtual std::string newSeq() = 0;
 };
 
 }  // namespace boostssl
