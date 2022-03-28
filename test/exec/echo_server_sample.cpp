@@ -53,24 +53,26 @@ int main(int argc, char** argv)
 
     std::string host = argv[1];
     uint16_t port = atoi(argv[2]);
-    bool isEcho = false;
     std::string echo = "false";
 
+    bool disableSsl = false;
     if (argc > 3)
     {
-        isEcho = std::string(argv[3]) == "true";
+        disableSsl = std::string(argv[3]) == "true";
     }
 
+    bool isEcho = false;
+
     BCOS_LOG(INFO) << LOG_DESC("echo-server-sample") << LOG_KV("ip", host) << LOG_KV("port", port)
-                   << LOG_KV("is echo", isEcho);
+                   << LOG_KV("isEcho", isEcho) << LOG_KV("disableSsl", disableSsl);
 
     auto config = std::make_shared<WsConfig>();
     config->setModel(WsModel::Server);
 
     config->setListenIP(host);
     config->setListenPort(port);
-    config->setThreadPoolSize(1);
-    config->setDisableSsl(false);
+    // config->setThreadPoolSize(1);
+    config->setDisableSsl(disableSsl);
     if (!config->disableSsl())
     {
         auto contextConfig = std::make_shared<ContextConfig>();
