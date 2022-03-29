@@ -30,6 +30,8 @@
 #include <boost/beast/websocket.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 
 namespace bcos
@@ -146,11 +148,12 @@ public:
     int32_t maxWriteMsgSize() const { return m_maxWriteMsgSize; }
     void setMaxWriteMsgSize(int32_t _maxWriteMsgSize) { m_maxWriteMsgSize = _maxWriteMsgSize; }
 
-    std::size_t queueSize()
+    std::size_t msgQueueSize()
     {
-        boost::shared_lock<boost::shared_mutex> lock(x_queue);
-        return m_queue.size();
+        boost::shared_lock<boost::shared_mutex> lock(x_msgQueue);
+        return m_msgQueue.size();
     }
+
 
 public:
     struct CallBack
@@ -183,7 +186,7 @@ private:
     //
     WsStreamDelegate::Ptr m_wsStreamDelegate;
     // callbacks
-    boost::shared_mutex x_callback;
+    std::shared_mutex x_callback;
     std::unordered_map<std::string, CallBack::Ptr> m_callbacks;
 
     // callback handler
@@ -205,8 +208,8 @@ private:
     };
 
     // send message queue
-    mutable boost::shared_mutex x_queue;
-    std::vector<std::shared_ptr<Message>> m_queue;
+    mutable boost::shared_mutex x_msgQueue;
+    std::list<std::shared_ptr<Message>> m_msgQueue;
 
     // for send performance statistics
     std::atomic<uint32_t> m_msgDelayCount = 0;
