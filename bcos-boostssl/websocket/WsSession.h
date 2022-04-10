@@ -30,6 +30,7 @@
 #include <boost/beast/websocket.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <list>
 #include <unordered_map>
 
 namespace bcos
@@ -192,7 +193,7 @@ private:
 
     // send message queue
     mutable boost::shared_mutex x_queue;
-    std::vector<std::shared_ptr<bcos::bytes>> m_queue;
+    std::list<std::shared_ptr<bcos::bytes>> m_queue;
 };
 
 }  // namespace ws

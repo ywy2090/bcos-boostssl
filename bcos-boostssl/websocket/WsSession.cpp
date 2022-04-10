@@ -265,7 +265,7 @@ void WsSession::onWritePacket()
 {
     boost::unique_lock<boost::shared_mutex> lock(x_queue);
     // remove the front ele from the queue, it has been sent
-    m_queue.erase(m_queue.begin());
+    m_queue.pop_front();
 
     // send the next message if any
     if (!m_queue.empty())
